@@ -10,5 +10,6 @@ pyqt5 (optional, for UI design)
 pyinstaller (optional, for packing .py to .exe)
 
 # Notes
-1. Estimation results are not correct yet. Now debugging. 
-2. Back-up simulator.py before transforming .ui to .py, as the existed .py will be lost. 
+1. Estimation results are not correct yet. Now debugging.
+
+2. Only xxx_alpha.py will be called in main.py 
