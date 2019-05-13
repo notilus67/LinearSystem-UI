@@ -10,6 +10,6 @@ pyqt5 (optional, for UI design)
 pyinstaller (optional, for packing .py to .exe)
 
 # Notes
-1. Estimation results are not correct yet. Now debugging.
+1. Estimation results are correct yet. Now improving.
 
 2. Only xxx_alpha.py will be called in main.py 
