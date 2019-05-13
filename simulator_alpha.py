@@ -202,6 +202,8 @@ class Ui_Panel(object):
                     b += flatten(item)
             return b
 
+        np.set_printoptions(precision=15)  # 提高Numpy的精度到小数点后15位，可以得到同样的xl
+
         A = Ui_Panel.toMatrix(self.input_A.text())
         B = Ui_Panel.toMatrix(self.input_B.text())
         C = Ui_Panel.toMatrix(self.input_C.text())
@@ -280,8 +282,8 @@ class Ui_Panel(object):
             F2 = mat(AH)-mat(L2)*mat(C1)
             L1s = mat(L1)*mat(U2)+mat(E1)
             L2s = mat(L2)*mat(U2)+mat(E1)
-            print(F1)
-            print(zeros((n-q,n-q)))     # 这里的写法和matlab不一样
+            #print(F1)
+            #print(zeros((n-q,n-q)))     # 这里的写法和matlab不一样
             tmp1 = np.hstack((F1,zeros((n-q,n-q))))
             tmp2 = np.hstack((zeros((n-q,n-q)),F2))
             F = np.row_stack((tmp1,tmp2))
@@ -295,29 +297,23 @@ class Ui_Panel(object):
             fx0 = (zeros((n, int(100*tm)+1)))  # 注意写法
             fy = (zeros((n-1,int(100*tm)+1)))
             fx[:,0] = x[:,0]
-            fq = (zeros((n-1,int(100*tm)+1)))
-            fxe = (zeros((n,int(100*tm)+1)))
-            fz = (zeros((n+1,int(100*tm)+1)))
             fq0 = (zeros((n-q,int(100*tm)+1)))
             fxe0 = (zeros((n,int(100*tm)+1)))
             error = (zeros((n, int(100 * tm)+1)))
-            xl = x[0:n-q,:]
             x0 = x
 
             for t in np.arange(0, tm, 0.01):
                 if t<t0:
                     fx[:, int(100*t+1)] = np.transpose(mat(mat(x)+(mat(A)*mat(x)+mat(B)*mat(u))*0.01))
                     fx0[:, int(100*t+1)] = np.transpose(mat(mat(x)+(mat(A)*mat(x)+mat(B)*mat(u))*0.01))
-                    fxe[:, int(100*t+1)] = np.transpose(mat(mat(x)+(mat(A)*mat(x)+mat(B)*mat(u))*0.01))
                     fxe0[:, int(100*t+1)] = np.transpose(mat(mat(x)+(mat(A)*mat(x)+mat(B)*mat(u))*0.01))
                     x = np.transpose(mat(fx[:,int(100*t+1)]))
                     fy[:, int(100*t+1)] = np.transpose(mat(C)*mat(x))
                     x0 = x
+
                 else:
-                    #[:, int(100*t+1)] = np.transpose(mat(x)+(mat(A)*mat(x)+mat(B)*mat(u)+(2*sin(20*pi*t)+2))*0.01)
-                    fx[:, int(100*t+1)] = np.transpose(mat(x)+(mat(A)*mat(x)+mat(B)*mat(u)+(sinA*sin(sinOmega*pi*t+sinPhi)+sinK))*0.01)
+                    fx[:, int(100*t+1)] = np.transpose(mat(x)+(mat(A)*mat(x)+mat(B)*mat(u)+ mat(D) * (sinA*sin(sinOmega*pi*t+sinPhi)+sinK))*0.01)
                     fx0[:, int(100 * t + 1)] = np.transpose(mat(x0) + (mat(A) * mat(x0) + mat(B) * mat(u)) * 0.01)
-                    fxe[:, int(100 * t + 1)] = np.transpose(mat(mat(x) + (mat(A) * mat(x) + mat(B) * mat(u)) * 0.01))
                     fxe0[:, int(100 * t + 1)] = np.transpose(mat(mat(x) + (mat(A) * mat(x) + mat(B) * mat(u)) * 0.01))
                     x = np.transpose(mat(fx[:,int(100*t+1)]))
                     x0 = np.transpose(mat(fx0[:,int(100*t+1)]))
@@ -326,6 +322,7 @@ class Ui_Panel(object):
                 if (abs(mat(x[0, :] - x0[0, :])[0, 0]) > 0):
                     t_att = t
                     break
+            print("受到攻击的时间是：")
             print(t_att)
             #z = mat(S)*mat(np.hstack((eye(n-q),zeros((n-q,q)))))*mat(np.linalg.inv(T))*mat(x)
             #print(z)
@@ -333,28 +330,27 @@ class Ui_Panel(object):
             #for i in np.arange(0, t0, 0.01):
             #    fz[:,int(100*i+1)] = mat(z) + (mat(F)*mat(z)+mat(H)*mat(y)+mat(G)+mat(u))*0.01
             #print(fz[:,int(t0*100+1)])
-            print(fxe0[:, int(100 * t + 1)])
-            xl = x[0:n-q,:]
-            print(xl)
+            #print(fxe0[:, int(100 * t + 1)])
+            xl = x[0:n-q,:]   #  提高精度后，xl已相同
             for t in np.arange(t_att, tm-0.01, 0.01):
-                fx[:, int(100 * t + 1)] = np.transpose(mat(x) + (mat(A) * mat(x) + mat(B) * mat(u) + (sinA * sin(sinOmega * pi * t + sinPhi) + sinK)) * 0.01)
+                fx[:, int(100 * t + 1)] = np.transpose(mat(x) + (mat(A) * mat(x) + mat(B) * mat(u) + mat(D) * (sinA * sin(sinOmega * pi * t + sinPhi) + sinK)) * 0.01)
                 #fx[:, int(100 * t + 1)] = np.transpose(mat(x) + (mat(A) * mat(x) + mat(B) * mat(u) + (2 * sin(20 * pi * t) + 2)) * 0.01)
                 x = np.transpose(mat(fx[:, int(100 * t + 1)]))
                 fy[:, int(100 * t + 1)] = np.transpose(mat(C) * mat(x))
                 y = np.transpose(mat(fy[:, int(100 * t + 1)]))
                 if(t == t_att+0.01):
                     tmp1 = mat(AH)-mat(L1)*mat(C1)
-                    print(tmp1)
+                    #print(tmp1)
                     tmp2 = mat(tmp1)*mat(xl)
-                    print(tmp2)
+                    #print(tmp2)
                     tmp3 = mat(B11)*mat(u)
-                    print(tmp3)
+                    #print(tmp3)
                     tmp4 = mat(L1s)*mat(y)
-                    print(tmp4)
+                    #print(tmp4)
                     tmp5 = (mat(tmp2)+mat(tmp3)+mat(tmp4))*0.01
-                    print(tmp5)
+                    #print(tmp5)
                     tmp6 = mat(xl)+mat(tmp5)
-                    print(tmp6)
+                    #print(tmp6)
                 fq0[:, int(100 * t + 1)] = np.transpose(mat(mat(xl) + ((mat(AH)-mat(L1)*mat(C1))*mat(xl) + mat(mat(B11)*mat(u)+mat(L1s)*mat(y)))*0.01))
                 #fq0[:, int(100 * t + 1)] = np.transpose(tmp6)
                 xl = np.transpose(mat(fq0[:, int(100 * t + 1)]))
